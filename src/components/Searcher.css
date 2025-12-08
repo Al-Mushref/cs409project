@@ -285,7 +285,7 @@
 }
 
 .results__item--active {
-  background: rgba(255, 107, 107, 0.1);
+  background: rgba(255, 255, 255, 0.1);
   border-left: 3px solid var(--color-accent-1);
 }
 
@@ -595,11 +595,6 @@
   flex-shrink: 0;
 }
 
-.generated__info {
-  min-width: 0;
-  flex: 1;
-}
-
 .generated__song-title {
   font-size: 15px;
   font-weight: 600;
@@ -630,4 +625,273 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+.generated-section {
+  margin-top: 2.5rem;
+  padding: 2rem 2.5rem 2.5rem;
+  border-radius: 24px;
+  background: radial-gradient(circle at top, rgba(88, 28, 135, 0.7), #020617);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+  color: #e5e7eb;
+}
+
+.generated-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.generated-header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  font-size: 1.3rem;
+}
+
+.generated-title {
+  margin: 0;
+  text-align: left;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #f0f0f5;
+}
+
+.generated-subtitle {
+  margin: 0.1rem 0 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.generated-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.generated-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.4rem;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.9);
+}
+
+.generated-card--liked {
+  outline: 1px solid rgba(34, 197, 94, 0.6);
+}
+
+.generated-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.generated-cover {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.generated-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.generated-song-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.generated-artist {
+  font-size: 0.85rem;
+  text-align: left;
+  opacity: 0.8;
+}
+
+.generated-duration {
+  font-size: 0.78rem;
+  text-align: left;
+  opacity: 0.7;
+  margin-top: 0.1rem;
+}
+
+.generated-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.generated-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  background: transparent;
+  color: #e5e7eb;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.generated-btn--like {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.generated-btn--like-active {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(34, 197, 94, 0.8);
+}
+
+.generated-btn--dislike {
+  opacity: 0.8;
+}
+
+.generated-heart {
+  font-size: 0.9rem;
+}
+
+.generated-info {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.8rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: transparent;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+/* liked songs tray */
+
+.liked-panel {
+  margin-top: 1.8rem;
+  border-radius: 20px;
+  background: rgba(6, 95, 70, 0.35);
+  padding: 1rem 1.3rem 1.3rem;
+}
+
+.liked-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.liked-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.liked-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.liked-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.liked-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.liked-count {
+  font-size: 0.8rem;
+  text-align: left;
+  opacity: 0.8;
+}
+
+.liked-toggle {
+  border: none;
+  background: transparent;
+  color: #e5e7eb;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.liked-body {
+  margin-top: 0.9rem;
+}
+
+.liked-empty {
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.liked-empty-icon {
+  font-size: 1.7rem;
+  margin-bottom: 0.3rem;
+}
+
+.liked-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.liked-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.liked-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.liked-item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.liked-item-title {
+  font-size: 0.9rem;
+}
+
+.liked-item-artist {
+  font-size: 0.78rem;
+  opacity: 0.78;
+}
+
+.liked-generate-playlist {
+  margin-top: 1rem;
+  width: 100%;
+  border-radius: 999px;
+  border: none;
+  padding: 0.7rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #022c22;
+  cursor: pointer;
 }

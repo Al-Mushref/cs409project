@@ -42,6 +42,9 @@ function Searcher(props) {
   });
   const [generatedSongs, setGeneratedSongs] = useState([]);
 
+  const [likedSongs, setLikedSongs] = useState([]);
+  const [likedOpen, setLikedOpen] = useState(true);
+
   const access_token = props.token;
   const apiClient = props.apiClient;
 
@@ -53,6 +56,7 @@ function Searcher(props) {
       return;
     }
 
+    // fallback to mock search if no token
     if (!access_token) {
       const filtered = MOCK_TRACKS.filter((track) => {
         const name = track.name.toLowerCase();
@@ -96,6 +100,7 @@ function Searcher(props) {
   const handleSongSelect = (track) => {
     setSelectedTrack(track);
     setGeneratedSongs([]);
+    setLikedSongs([]);
   };
 
   const handleGenerateClick = async () => {
@@ -104,10 +109,26 @@ function Searcher(props) {
     try {
       const songs = await generateSongs(selectedTrack, moodSettings, apiClient);
       setGeneratedSongs(songs);
-      console.log("Generated Songs:", songs);
+      setLikedSongs([]);
     } catch (e) {
       console.error("Error generating songs:", e);
     }
+  };
+
+  const isLiked = (id) => likedSongs.some((s) => s.id === id);
+
+  const toggleLike = (song) => {
+    setLikedSongs((prev) => {
+      const already = prev.some((s) => s.id === song.id);
+      if (already) {
+        return prev.filter((s) => s.id !== song.id);
+      }
+      return [...prev, song];
+    });
+  };
+
+  const dislikeSong = (songId) => {
+    setLikedSongs((prev) => prev.filter((s) => s.id !== songId));
   };
 
   return (
@@ -131,6 +152,7 @@ function Searcher(props) {
         </header>
 
         <div className="searcher__layout">
+          {/* left: search + results */}
           <div className="searcher__main">
             <div className="search-box">
               <div className="search-box__input-wrapper">
@@ -218,6 +240,7 @@ function Searcher(props) {
             </div>
           </div>
 
+          {/* right: seed track + mood sliders */}
           <div className="searcher__sidebar">
             {selectedTrack && (
               <div className="seed-card">
@@ -407,63 +430,155 @@ function Searcher(props) {
                 </button>
               </div>
             )}
-
-            {generatedSongs.length > 0 && (
-              <div className="generated">
-                <h2 className="generated__title">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="generated__title-icon"
-                  >
-                    <path
-                      d="M9 18V5l12-2v13"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle
-                      cx="6"
-                      cy="18"
-                      r="3"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                    <circle
-                      cx="18"
-                      cy="16"
-                      r="3"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                  </svg>
-                  Your Recommendations
-                </h2>
-                <ul className="generated__list">
-                  {generatedSongs.map((song, index) => (
-                    <li
-                      key={song.id}
-                      className="generated__item"
-                      style={{ animationDelay: `${index * 80}ms` }}
-                    >
-                      <div className="generated__number">
-                        {String(index + 1).padStart(2, "0")}
-                      </div>
-                      <div className="generated__info">
-                        <div className="generated__song-title">
-                          {song.title}
-                        </div>
-                        <div className="generated__artist">{song.artist}</div>
-                        <div className="generated__reason">{song.reason}</div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </div>
+
+        {/* generated songs + liked songs */}
+        {generatedSongs.length > 0 && (
+          <div className="generated-section">
+            <header className="generated-header">
+              <div className="generated-header-icon">🎵</div>
+              <div>
+                <h2 className="generated-title">Generated Songs</h2>
+                <p className="generated-subtitle">
+                  Discover tracks tailored to your taste
+                </p>
+              </div>
+            </header>
+
+            <div className="generated-list">
+              {generatedSongs.map((song) => {
+                const liked = isLiked(song.id);
+                return (
+                  <div
+                    key={song.id}
+                    className={
+                      "generated-card" + (liked ? " generated-card--liked" : "")
+                    }
+                  >
+                    <div className="generated-main">
+                      {song.imageUrl && (
+                        <img
+                          src={song.imageUrl}
+                          alt={song.title}
+                          className="generated-cover"
+                        />
+                      )}
+
+                      <div className="generated-text">
+                        <div className="generated-song-title">
+                          {song.title}
+                        </div>
+                        <div className="generated-artist">
+                          {song.artist}
+                        </div>
+                        {song.duration && (
+                          <div className="generated-duration">
+                            {song.duration}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="generated-actions">
+                      <button
+                        type="button"
+                        className={
+                          "generated-btn generated-btn--like" +
+                          (liked ? " generated-btn--like-active" : "")
+                        }
+                        onClick={() => toggleLike(song)}
+                      >
+                        <span className="generated-heart">
+                          {liked ? "💚" : "🤍"}
+                        </span>
+                        {liked ? "Liked" : "Like"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="generated-btn generated-btn--dislike"
+                        onClick={() => dislikeSong(song.id)}
+                      >
+                        Dislike
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <section className="liked-panel">
+              <header
+                className="liked-header"
+                onClick={() => setLikedOpen(!likedOpen)}
+              >
+                <div className="liked-left">
+                  <div className="liked-icon">🎵</div>
+                  <div className="liked-text">
+                    <div className="liked-title">Liked Songs</div>
+                    <div className="liked-count">
+                      {likedSongs.length}{" "}
+                      {likedSongs.length === 1 ? "song" : "songs"}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="liked-toggle"
+                  aria-label="Toggle liked songs"
+                >
+                  {likedOpen ? "▾" : "▸"}
+                </button>
+              </header>
+
+              {likedOpen && (
+                <div className="liked-body">
+                  {likedSongs.length === 0 ? (
+                    <div className="liked-empty">
+                      <div className="liked-empty-icon">🎧</div>
+                      <p>No liked songs yet</p>
+                      <span>Start liking songs to build your playlist.</span>
+                    </div>
+                  ) : (
+                    <ul className="liked-list">
+                      {likedSongs.map((song) => (
+                        <li key={song.id} className="liked-item">
+                          {song.imageUrl && (
+                            <img
+                              src={song.imageUrl}
+                              alt={song.title}
+                              className="liked-cover"
+                            />
+                          )}
+                          <div className="liked-item-text">
+                            <div className="liked-item-title">
+                              {song.title}
+                            </div>
+                            <div className="liked-item-artist">
+                              {song.artist}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="liked-generate-playlist"
+                onClick={() => {
+                  console.log("Generate playlist with:", likedSongs);
+                  // TODO: call Spotify API to create playlist
+                }}
+              >
+                Generate Playlist
+              </button>
+            </section>
+          </div>
+        )}
       </div>
     </div>
   );
