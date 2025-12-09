@@ -1,110 +1,75 @@
-// import React, { useState, useEffect } from 'react';
-// import Searcher from './components/Searcher';
-// import './App.css';
-
-// function App() {
-//     const CLIENT_ID = "0ee094bb5b544998a735400b357f542f"
-//     const REDIRECT_URI = "http://localhost:3000"
-//     const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
-//     const RESPONSE_TYPE = "token"
-
-//     const [token, setToken] = useState("");
-
-//     useEffect(() => {
-//         const hash = window.location.hash;
-//         let token = window.localStorage.getItem("token");
-
-//         if (hash && hash) {
-//           const token = hash.substring(1).split("&").find(elem => elem.startsWith("access_token")).split("=")[1];
-//             window.location.hash = "";
-//             window.localStorage.setItem("token", token);
-//         }
-
-//         setToken(token)
-//     }, [])
-
-//     const logout = () => {
-//         setToken("");
-//         window.localStorage.removeItem("token");
-//     }
-
-//     return (
-//       <div className="App">
-//         <header className="App-header">
-//           <div className="LoginContainer">
-//             <h2>Musical Matchmaker</h2>
-//             {!token ?
-//               <div >
-//                 <a className = "logInButton" href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}`}>
-//                  Login to Spotify
-//                </a>
-//               </div>
-//               :
-//               <div>
-//                 <Searcher token={token} />
-//                 <button className= "logOut"onClick={logout}>Logout</button>
-//               </div>
-//             }
-//           </div>
-//         </header>
-//       </div>
-//     );
-// }
-
-// export default App;
-
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Searcher from "./components/Searcher";
+import Callback from "./pages/Callback";
 import "./App.css";
 
-// Spotify API client setup (not tested yet)
-const apiClient = axios.create({
-  baseURL: "https://api.spotify.com",
-  headers: {
-    Authorization: `Bearer YOUR_SPOTIFY_ACCESS_TOKEN`, // This will be dynamically set
-  },
-});
-
 function App() {
-  const CLIENT_ID = "9f3b6455c9314182b49be4ab443bd6f3"; // Al-Waleed's client id (still doesn't work)
-  const REDIRECT_URI = "http://127.0.0.1:3000"; // required instead of localhost
+  const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID || "";
+  const REDIRECT_URI = process.env.REACT_APP_SPOTIFY_REDIRECT_URI || "http://127.0.0.1:5002/callback";
   const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
-  const RESPONSE_TYPE = "token";
 
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    const hash = window.location.hash;
-    let token = window.localStorage.getItem("token");
-
-    if (hash && hash) {
-      const token = hash
-        .substring(1)
-        .split("&")
-        .find((elem) => elem.startsWith("access_token"))
-        .split("=")[1];
-      window.location.hash = "";
-      window.localStorage.setItem("token", token);
-    }
-
-    setToken(token);
-  }, []);
+  const [token, setToken] = useState(() => localStorage.getItem("spotify_token") || "");
 
   const logout = () => {
     setToken("");
-    window.localStorage.removeItem("token");
+    localStorage.removeItem("spotify_token");
+  };
+
+  const handleLogin = () => {
+    const scopes = ["user-read-private", "user-read-email"].join(" ");
+    const authorizeUrl = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(
+      REDIRECT_URI
+    )}&scope=${encodeURIComponent(scopes)}`;
+    window.location.href = authorizeUrl;
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <div>
-          {/* For now we ignore login issues and just pass the token (or empty) */}
-          <Searcher token={token} apiClient={null} />
-        </div>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/callback" element={<Callback />} />
+        <Route
+          path="/"
+          element={
+            <div className="App">
+              <header className="App-header">
+                {!token ? (
+                  <div className="login-shell">
+                    <div className="login-background">
+                      <div className="login-orb login-orb--1" />
+                      <div className="login-orb login-orb--2" />
+                      <div className="login-orb login-orb--3" />
+                    </div>
+                    <div className="login-container">
+                      <div className="cadence-logo">
+                        <img src="/logo-bg-removed.png" alt="Cadence" className="cadence-logo-img" />
+                      </div>
+                      <button className="login-btn" onClick={handleLogin}>
+                        Login with Spotify
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="search-shell">
+                    <div className="search-background">
+                      <div className="search-orb search-orb--1" />
+                      <div className="search-orb search-orb--2" />
+                      <div className="search-orb search-orb--3" />
+                    </div>
+                    <div className="search-container">
+                      <button className="logOut" onClick={logout}>
+                        Logout
+                      </button>
+                      <Searcher token={token} />
+                    </div>
+                  </div>
+                )}
+              </header>
+            </div>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
