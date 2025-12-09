@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import axios from "axios";
 import Searcher from "./components/Searcher";
 import Callback from "./pages/Callback";
 import "./App.css";
@@ -17,7 +18,12 @@ function App() {
   };
 
   const handleLogin = () => {
-    const scopes = ["user-read-private", "user-read-email"].join(" ");
+    const scopes = [
+      "user-read-private",
+      "user-read-email",
+      "playlist-modify-public",
+      "playlist-modify-private"
+    ].join(" ");
     const authorizeUrl = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(
       REDIRECT_URI
     )}&scope=${encodeURIComponent(scopes)}`;

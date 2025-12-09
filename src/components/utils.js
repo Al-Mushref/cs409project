@@ -1,4 +1,6 @@
 // src/components/utils.js
+import axios from "axios";
+
 const formatDuration = (ms) => {
   if (!ms && ms !== 0) return "";
   const totalSeconds = Math.floor(ms / 1000);
@@ -7,33 +9,55 @@ const formatDuration = (ms) => {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
 
-export const generateSongs = async (seedSong, moodSettings, apiClient) => {
+export const generateSongs = async (seedSong, moodSettings, token) => {
   const { energy, danceability, valence } = moodSettings;
 
-  // REAL SPOTIFY RECS
-  if (apiClient) {
-    const res = await apiClient.get("/v1/recommendations", {
-      params: {
-        seed_tracks: seedSong.id,
-        target_energy: energy,
-        target_danceability: danceability,
-        target_valence: valence,
-        limit: 10,
-      },
-    });
+  // Use /search as alternative since /recommendations is deprecated
+  if (token) {
+    try {
+      console.log("Finding similar songs for:", seedSong.name);
+      
+      // Get the artist name and track name
+      const artistName = seedSong.artists?.[0]?.name || "";
+      const trackName = seedSong.name || seedSong.title || "";
+      
+      // Search using artist + track name to find similar songs
+      const searchQuery = `${artistName} ${trackName}`;
+      console.log("Search query:", searchQuery);
+      
+      const res = await axios.get("https://api.spotify.com/v1/search", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          q: searchQuery,
+          type: "track",
+          limit: 20, // Get more results to skip the first one
+        },
+      });
 
-    return (res.data.tracks || []).map((t) => ({
-      id: t.id,
-      title: t.name,
-      artist: t.artists?.map((a) => a.name).join(", ") || "",
-      album: t.album?.name || "",
-      duration: formatDuration(t.duration_ms),
-      imageUrl: t.album?.images?.[0]?.url || "",  // 👈 cover image
-      reason: `Recommended based on "${seedSong.name || seedSong.title}".`,
-    }));
+      console.log("Search results:", res.data);
+      
+      // Skip the first result (likely the original song) and take the next 10
+      const tracks = (res.data.tracks?.items || []).slice(1, 11);
+      
+      return tracks.map((t) => ({
+        id: t.id,
+        title: t.name,
+        artist: t.artists?.map((a) => a.name).join(", ") || "",
+        album: t.album?.name || "",
+        duration: formatDuration(t.duration_ms),
+        imageUrl: t.album?.images?.[0]?.url || "",
+        reason: `Similar to "${trackName}" by ${artistName}`,
+      }));
+    } catch (error) {
+      console.error("Spotify search error:", error);
+      console.error("Error response data:", error.response?.data);
+      throw error;
+    }
   }
 
-  // MOCK DATA
+  // MOCK DATA (fallback)
   return generateMockSongs(seedSong, moodSettings);
 };
 
