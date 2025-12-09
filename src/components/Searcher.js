@@ -46,7 +46,6 @@ function Searcher(props) {
   const [likedOpen, setLikedOpen] = useState(true);
 
   const access_token = props.token;
-  const apiClient = props.apiClient;
 
   const searchSong = async () => {
     const query = searchKey.trim().toLowerCase();
@@ -107,11 +106,12 @@ function Searcher(props) {
     if (!selectedTrack) return;
 
     try {
-      const songs = await generateSongs(selectedTrack, moodSettings, apiClient);
+      const songs = await generateSongs(selectedTrack, moodSettings, access_token);
       setGeneratedSongs(songs);
       setLikedSongs([]);
     } catch (e) {
       console.error("Error generating songs:", e);
+      alert(`Failed to generate recommendations: ${e.response?.data?.error?.message || e.message}`);
     }
   };
 
@@ -129,6 +129,89 @@ function Searcher(props) {
 
   const dislikeSong = (songId) => {
     setLikedSongs((prev) => prev.filter((s) => s.id !== songId));
+  };
+
+  const handleCreatePlaylist = async () => {
+    if (likedSongs.length === 0) {
+      alert("Please like at least one song to create a playlist");
+      return;
+    }
+
+    if (!access_token) {
+      alert("Please log in to create a playlist");
+      return;
+    }
+
+    // Prompt user for playlist name
+    const defaultName = `Cadence Mix - ${new Date().toLocaleDateString()}`;
+    const playlistName = prompt("Enter a name for your playlist:", defaultName);
+    
+    // If user cancels, don't create playlist
+    if (!playlistName || playlistName.trim() === "") {
+      return;
+    }
+
+    try {
+      // Get user profile to get user ID
+      const userResponse = await axios.get("https://api.spotify.com/v1/me", {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      const userId = userResponse.data.id;
+
+      // Create playlist with user's chosen name
+      const playlistResponse = await axios.post(
+        `https://api.spotify.com/v1/users/${userId}/playlists`,
+        {
+          name: playlistName,
+          description: "Created with Cadence - Your personalized music generator",
+          public: false,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const playlistId = playlistResponse.data.id;
+
+      // Add tracks to playlist
+      const trackUris = likedSongs.map((song) => `spotify:track:${song.id}`);
+      await axios.post(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+        {
+          uris: trackUris,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      alert(`Playlist "${playlistName}" created successfully with ${likedSongs.length} songs`);
+      
+      // Optional: Clear liked songs after creating playlist
+      setLikedSongs([]);
+    } catch (error) {
+      console.error("Error creating playlist:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      
+      if (error.response?.status === 401) {
+        alert("Your session has expired. Please log out and log back in.");
+      } else if (error.response?.status === 403) {
+        alert("Missing permissions. Please log out and log back in to grant playlist creation access.");
+      } else {
+        const errorMsg = error.response?.data?.error?.message || error.message;
+        alert(`Failed to create playlist: ${errorMsg}`);
+      }
+    }
   };
 
   return (
@@ -569,11 +652,22 @@ function Searcher(props) {
               <button
                 type="button"
                 className="liked-generate-playlist"
-                onClick={() => {
-                  console.log("Generate playlist with:", likedSongs);
-                  // TODO: call Spotify API to create playlist
-                }}
+                onClick={handleCreatePlaylist}
+                disabled={likedSongs.length === 0}
               >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="playlist-icon"
+                  style={{ width: "20px", height: "20px", marginRight: "8px" }}
+                >
+                  <path
+                    d="M12 3v18M3 12h18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
                 Generate Playlist
               </button>
             </section>
