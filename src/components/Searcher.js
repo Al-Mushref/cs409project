@@ -655,19 +655,7 @@ function Searcher(props) {
                 onClick={handleCreatePlaylist}
                 disabled={likedSongs.length === 0}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="playlist-icon"
-                  style={{ width: "20px", height: "20px", marginRight: "8px" }}
-                >
-                  <path
-                    d="M12 3v18M3 12h18"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
+
                 Generate Playlist
               </button>
             </section>

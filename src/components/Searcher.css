@@ -378,6 +378,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 
 .seed-card__artist {
@@ -387,6 +388,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 
 .mood-panel {
@@ -711,6 +713,7 @@
 .generated-song-title {
   font-size: 1rem;
   font-weight: 600;
+  text-align: left;
 }
 
 .generated-artist {
@@ -876,11 +879,13 @@
 
 .liked-item-title {
   font-size: 0.9rem;
+  text-align: left;
 }
 
 .liked-item-artist {
   font-size: 0.78rem;
   opacity: 0.78;
+  text-align: left;
 }
 
 .liked-generate-playlist {
@@ -894,4 +899,5 @@
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: #022c22;
   cursor: pointer;
+  text-align: center;
 }
