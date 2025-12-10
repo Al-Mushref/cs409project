@@ -945,6 +945,7 @@
 }
 
 .saved-mixes-title {
+  text-align: left;
   font-size: 1rem;
   font-weight: 600;
 }
@@ -1016,6 +1017,7 @@
 }
 
 .saved-mix-name {
+  text-align: left;
   font-size: 0.95rem;
   font-weight: 500;
 }
